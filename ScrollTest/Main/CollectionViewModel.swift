@@ -12,11 +12,7 @@ class CollectionViewModel: ObservableObject {
     
     
     @Published private(set) var state: MainViewState = .loading
-//    var photoModels: [PhotoModel] = [] {
-//        didSet {
-//            print("DIDSET PHOTOMODELS")
-//        }
-//    }
+    
     var photoModels = CurrentValueSubject<[PhotoModel], Never>([]) {
         didSet {
             print("Photo models: \(photoModels.value.count)")
@@ -38,7 +34,6 @@ class CollectionViewModel: ObservableObject {
     
     init() {
         fetchRandom()
-//        setupSubscription()
     }
     
     func fetchRandom() {
@@ -52,7 +47,6 @@ class CollectionViewModel: ObservableObject {
                     self.state = .error(error.localizedDescription)
                 }
             }, receiveValue: {
-//                print("Fetch Random success value: \($0)")
                 self.photoModels.value += $0.results
                 self.page += 1
             }).store(in: &bag)
@@ -61,21 +55,6 @@ class CollectionViewModel: ObservableObject {
     func storeDeletion(photoModel: PhotoModel, at index: Int) {
         deletedStorage[index] = photoModel
     }
-    
-//    private func setupSubscription() {
-//        loadedPage.sink { completion in
-//            switch completion {
-//            case .finished:
-//                break
-//            case .failure(let error):
-//                self.state = .error(error.localizedDescription)
-//            }
-//        } receiveValue: { models in
-////            print("SUB!")
-//            self.photoModels.append(contentsOf: models.results)
-//        }.store(in: &bag)
-//
-//    }
     
 }
 

@@ -45,9 +45,6 @@ class CustomCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        //let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
-        //contentView.addGestureRecognizer(tap)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -68,7 +65,6 @@ class CustomCell: UICollectionViewCell {
         
         contentView.addSubview(activityIndicator)
         contentView.addSubview(myImageView)
-        //imageStackView.addArrangedSubview(myImageView)
         myImageView.backgroundColor = .gray
         
         
@@ -77,24 +73,6 @@ class CustomCell: UICollectionViewCell {
         setupSubscriptions()
         imageLoader.load()
         
-    }
-    
-    @objc func handleTap(_ sender: UITapGestureRecognizer? = nil) {
-        // handling code
-        //animate()
-   
-        self.viewModel.storeDeletion(photoModel: self.photoModel, at: self.indexPath.row)
-        //viewModel.photoModels.value.remove(at: indexPath.row)
-    }
-    
-    private func animate() {
-        UIView.animate(withDuration: 0.35, animations: {
-
-            let moveRight = CGAffineTransform(translationX: +(self.contentView.bounds.width + 10), y: 0.0)
-            self.myImageView.transform = moveRight
-
-        })
-
     }
     
     private func setupSubscriptions() {

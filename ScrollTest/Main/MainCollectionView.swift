@@ -21,9 +21,6 @@ class MainCollectionView: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
         configureCollectionViewDataSource()
         applySnapshot(photoModels: viewModel.photoModels.value)
 
@@ -32,7 +29,6 @@ class MainCollectionView: UICollectionViewController {
         collectionView.setCollectionViewLayout(generateLayout(), animated: false)
 
         // Do any additional setup after loading the view.
-       
         setupSubscription()
 
     }
@@ -49,7 +45,10 @@ class MainCollectionView: UICollectionViewController {
             cell?.alpha = 0
             })
         
-            self.viewModel.photoModels.value.remove(at: indexPath.row)
+        let photoModel = viewModel.photoModels.value[indexPath.row]
+        deleteFromSnapshot(photoModels: [photoModel])
+        
+//            self.viewModel.photoModels.value.remove(at: indexPath.row)
             print(self.viewModel.photoModels.value.count)
     }
     
@@ -98,6 +97,11 @@ extension MainCollectionView {
             cell.initialize()
             return cell
         })
+    }
+    
+    private func deleteFromSnapshot(photoModels: [PhotoModel]) {
+        snapshot.deleteItems(photoModels)
+        dataSource.apply(snapshot)
     }
     
     private func applySnapshot(photoModels: [PhotoModel]) {
