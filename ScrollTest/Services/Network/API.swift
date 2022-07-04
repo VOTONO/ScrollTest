@@ -15,13 +15,13 @@ enum API {
 }
 
 extension API {
-    static func getRandomPhotos(page: Int, limit: Int) -> AnyPublisher<SearchModel, Error> {
-        let url = base.appendingPathComponent("/photos/random")
-        let queryItem = [URLQueryItem(name: "content_filter", value: "high"),
+    static func getRandomCats(page: Int, limit: Int) -> AnyPublisher<SearchModel, Error> {
+        let url = base.appendingPathComponent("/search/photos")
+        let queryItem = [URLQueryItem(name: "query", value: "cat"),
                          URLQueryItem(name: "orientation", value: "squarish"),
-                         URLQueryItem(name: "count", value: "\(limit)"),
-                         URLQueryItem(name: "per_page", value: "\(page)"),
-                         URLQueryItem(name: "client_id", value: self.keyItem),]
+                         URLQueryItem(name: "page", value: "\(page)"),
+                         URLQueryItem(name: "per_page", value: "\(limit)"),
+                         URLQueryItem(name: "client_id", value: self.keyItem)]
         return agent.run(url: url, parameters: queryItem)
     }
 }

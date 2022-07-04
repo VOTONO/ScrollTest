@@ -10,10 +10,14 @@ import Combine
 
 class MainCollectionView: UICollectionViewController {
     
+    
+    var imageCache: ImageCache = ImageCache()
     var viewModel: CollectionViewModel!
     
     private var dataSource: DataSource!
     private var snapshot = DataCourceSnapshot()
+    
+    private var bag = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,7 +25,7 @@ class MainCollectionView: UICollectionViewController {
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
         configureCollectionViewDataSource()
-        applySnapshot(photoModels: viewModel.photoModels)
+        applySnapshot(photoModels: viewModel.photoModels.value)
 
         // Register cell classes
         registerCell()
@@ -29,6 +33,41 @@ class MainCollectionView: UICollectionViewController {
 
         // Do any additional setup after loading the view.
        
+        setupSubscription()
+
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+
+        let cell = collectionView.cellForItem(at: indexPath)
+        
+        let originalTransform = self.view.transform
+        let scaledAndTranslatedTransform = originalTransform.translatedBy(x: self.view.frame.width, y: 0.0)
+        
+        UIView.animate(withDuration: 0.7, animations: {
+            cell?.transform = scaledAndTranslatedTransform
+            cell?.alpha = 0
+            })
+        
+            self.viewModel.photoModels.value.remove(at: indexPath.row)
+            print(self.viewModel.photoModels.value.count)
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.row == viewModel.photoModels.value.count - 1 {
+            print("Load Page")
+            self.viewModel.fetchRandom()
+        }
+    }
+    
+    
+    private func setupSubscription() {
+        viewModel.photoModels
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .sink { photoModels in
+            self.applySnapshot(photoModels: photoModels)
+        }.store(in: &bag)
+
     }
     
 }
@@ -49,8 +88,14 @@ extension MainCollectionView {
         
         dataSource = DataSource(collectionView: collectionView, cellProvider: { collectionView, indexPath, photoModel -> CustomCell? in
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CustomCell.id, for: indexPath) as! CustomCell
-            cell.photoModel = self.viewModel.photoModels[indexPath.row]
             
+            //# WARNING! Don't forget to ingect ViewModel, imageCache(with self.imageCache) and IndexPath!!!
+            cell.viewModel = self.viewModel
+            cell.imageCache = self.imageCache
+            cell.indexPath = indexPath
+            
+            //# WARNING! Call this function only after injections
+            cell.initialize()
             return cell
         })
     }

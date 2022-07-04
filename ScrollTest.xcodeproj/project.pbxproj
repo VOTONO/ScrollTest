@@ -18,6 +18,9 @@
 		63D59148286F1EA000C1D7F9 /* Agent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D59147286F1EA000C1D7F9 /* Agent.swift */; };
 		63D5914A286F1EB200C1D7F9 /* AgentErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D59149286F1EB200C1D7F9 /* AgentErrors.swift */; };
 		63D5914C286F31B000C1D7F9 /* CustomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D5914B286F31B000C1D7F9 /* CustomCell.swift */; };
+		63DB610A2871B4E700D1414B /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB61092871B4E700D1414B /* ImageLoader.swift */; };
+		63DB610D2871B52800D1414B /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB610C2871B52800D1414B /* ImageCache.swift */; };
+		63DB610F2871B57B00D1414B /* LRUCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB610E2871B57B00D1414B /* LRUCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +37,9 @@
 		63D59147286F1EA000C1D7F9 /* Agent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agent.swift; sourceTree = "<group>"; };
 		63D59149286F1EB200C1D7F9 /* AgentErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentErrors.swift; sourceTree = "<group>"; };
 		63D5914B286F31B000C1D7F9 /* CustomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCell.swift; sourceTree = "<group>"; };
+		63DB61092871B4E700D1414B /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
+		63DB610C2871B52800D1414B /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
+		63DB610E2871B57B00D1414B /* LRUCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LRUCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +76,7 @@
 				63D59124286F1A9400C1D7F9 /* SceneDelegate.swift */,
 				63D59136286F1B5500C1D7F9 /* Main */,
 				63D5913F286F1BED00C1D7F9 /* Model */,
-				63D59142286F1C9500C1D7F9 /* Network */,
+				63DB61082871B4C400D1414B /* Services */,
 				63D5912B286F1A9700C1D7F9 /* Assets.xcassets */,
 				63D5912D286F1A9700C1D7F9 /* LaunchScreen.storyboard */,
 				63D59130286F1A9700C1D7F9 /* Info.plist */,
@@ -104,6 +110,33 @@
 				63D59149286F1EB200C1D7F9 /* AgentErrors.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		63DB61072871B4B700D1414B /* ImageLoader */ = {
+			isa = PBXGroup;
+			children = (
+				63DB61092871B4E700D1414B /* ImageLoader.swift */,
+			);
+			path = ImageLoader;
+			sourceTree = "<group>";
+		};
+		63DB61082871B4C400D1414B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				63D59142286F1C9500C1D7F9 /* Network */,
+				63DB61072871B4B700D1414B /* ImageLoader */,
+				63DB610B2871B50C00D1414B /* ImageCache */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		63DB610B2871B50C00D1414B /* ImageCache */ = {
+			isa = PBXGroup;
+			children = (
+				63DB610C2871B52800D1414B /* ImageCache.swift */,
+				63DB610E2871B57B00D1414B /* LRUCache.swift */,
+			);
+			path = ImageCache;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -176,8 +209,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63DB610F2871B57B00D1414B /* LRUCache.swift in Sources */,
+				63DB610D2871B52800D1414B /* ImageCache.swift in Sources */,
 				63D59123286F1A9400C1D7F9 /* AppDelegate.swift in Sources */,
 				63D5914C286F31B000C1D7F9 /* CustomCell.swift in Sources */,
+				63DB610A2871B4E700D1414B /* ImageLoader.swift in Sources */,
 				63D59125286F1A9400C1D7F9 /* SceneDelegate.swift in Sources */,
 				63D59141286F1C2E00C1D7F9 /* Model.swift in Sources */,
 				63D5914A286F1EB200C1D7F9 /* AgentErrors.swift in Sources */,

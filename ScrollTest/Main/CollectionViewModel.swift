@@ -12,9 +12,23 @@ class CollectionViewModel: ObservableObject {
     
     
     @Published private(set) var state: MainViewState = .loading
-    @Published var photoModels: [PhotoModel] = [PhotoModel(stringURLs: SizeURL(full:        "https://i.pinimg.com/736x/6a/ff/bf/6affbf23bf64054256aac98d7062a8f6--pop-art-illustration-illustration-tutorial.jpg", small: "https://i.pinimg.com/736x/6a/ff/bf/6affbf23bf64054256aac98d7062pop-art-illustration-illustration-tutorial.jpg")),
-                                                PhotoModel(stringURLs: SizeURL(full: "https://i.pinimg.com/736x/6a/ff/bf/6affbf23bf64054256aac98d7062a8f6--pop-art-illustration-illustrtutorial.jpg", small: "https://i.pinimg.com/736x/6a/ff/bf/6affbf23bf64054256aac98d7062a8f6--pop-art-illustration-illustration-tutorial.jpg")),
-                                                PhotoModel(stringURLs: SizeURL(full: "https://i.pinimg.com/736x/6a/ff/bf/6affbf23bf64054256aac98d7062a8f6--pop-art-illustration-illustration-tutorial.jpg", small: "https://i.pinimg.com/736x/6atutorial.jpg")),]
+//    var photoModels: [PhotoModel] = [] {
+//        didSet {
+//            print("DIDSET PHOTOMODELS")
+//        }
+//    }
+    var photoModels = CurrentValueSubject<[PhotoModel], Never>([]) {
+        didSet {
+            print("Photo models: \(photoModels.value.count)")
+        }
+    }
+    private var deletedStorage: [Int : PhotoModel] = [ : ] {
+        didSet {
+            print("Store Deleted: \(deletedStorage.count)")
+            print("Photo models: \(photoModels.value.count)")
+        }
+    }
+    var loadedPage = PassthroughSubject<SearchModel, Never>()
     
     
     private let limit = 5
@@ -22,20 +36,46 @@ class CollectionViewModel: ObservableObject {
     
     private var bag = Set<AnyCancellable>()
     
-    private func fetchRandom() {
-        API.getRandomPhotos(page: page, limit: 5)
+    init() {
+        fetchRandom()
+//        setupSubscription()
+    }
+    
+    func fetchRandom() {
+        API.getRandomCats(page: page, limit: 5)
             .sink(receiveCompletion: {
                 switch $0 {
                 case .finished:
                     break
                 case .failure(let error):
+                    print("Fetch Random error: \(error)")
                     self.state = .error(error.localizedDescription)
                 }
             }, receiveValue: {
-                self.photoModels = $0.results
+//                print("Fetch Random success value: \($0)")
+                self.photoModels.value += $0.results
                 self.page += 1
             }).store(in: &bag)
     }
+    
+    func storeDeletion(photoModel: PhotoModel, at index: Int) {
+        deletedStorage[index] = photoModel
+    }
+    
+//    private func setupSubscription() {
+//        loadedPage.sink { completion in
+//            switch completion {
+//            case .finished:
+//                break
+//            case .failure(let error):
+//                self.state = .error(error.localizedDescription)
+//            }
+//        } receiveValue: { models in
+////            print("SUB!")
+//            self.photoModels.append(contentsOf: models.results)
+//        }.store(in: &bag)
+//
+//    }
     
 }
 

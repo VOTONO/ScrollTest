@@ -14,13 +14,13 @@ struct SearchModel: Decodable {
 
 struct PhotoModel: Decodable, Hashable {
     
-    var stringURLs: SizeURL
+    var urls: SizeURL
     
     func fullURL() -> URL {
-        return URL(string: stringURLs.full)!
+        return URL(string: urls.full)!
     }
     func smallURL() -> URL {
-        return URL(string: stringURLs.small)!
+        return URL(string: urls.small)!
     }
 }
 
