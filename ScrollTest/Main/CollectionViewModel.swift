@@ -12,6 +12,7 @@ class CollectionViewModel: ObservableObject {
     
     
     @Published private(set) var state: MainViewState = .loading
+    public let pullToRefreshSubject = PassthroughSubject<Void, Never>()
     
     var photoModels = CurrentValueSubject<[PhotoModel], Never>([]) {
         didSet {
@@ -26,7 +27,6 @@ class CollectionViewModel: ObservableObject {
     }
     var loadedPage = PassthroughSubject<SearchModel, Never>()
     
-    
     private let limit = 5
     private var page = 1
     
@@ -34,6 +34,7 @@ class CollectionViewModel: ObservableObject {
     
     init() {
         fetchRandom()
+        setupSubscriptions()
     }
     
     func fetchRandom() {
@@ -54,6 +55,15 @@ class CollectionViewModel: ObservableObject {
     
     func storeDeletion(photoModel: PhotoModel, at index: Int) {
         deletedStorage[index] = photoModel
+    }
+    private func setupSubscriptions() {
+        pullToRefreshSubject.sink { _ in
+            self.deletedStorage.forEach { key, value in
+                self.photoModels.value.insert(value, at: key)
+            }
+            print("Refreshing")
+            self.deletedStorage.removeAll()
+        }.store(in: &bag)
     }
     
 }

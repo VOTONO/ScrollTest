@@ -29,6 +29,7 @@ class MainCollectionView: UICollectionViewController {
         collectionView.setCollectionViewLayout(generateLayout(), animated: false)
 
         // Do any additional setup after loading the view.
+        setupRefreshControl()
         setupSubscription()
 
     }
@@ -63,6 +64,16 @@ class MainCollectionView: UICollectionViewController {
         }
     }
     
+    private func setupRefreshControl() {
+        let refresh = UIRefreshControl()
+        refresh.addTarget(self, action: #selector(onSwipeRefresh), for: .valueChanged)
+        collectionView.refreshControl = refresh
+    }
+    
+    @objc func onSwipeRefresh() {
+        viewModel.pullToRefreshSubject.send()
+        self.collectionView.refreshControl?.endRefreshing()
+    }
     
     private func setupSubscription() {
         viewModel.photoModels
