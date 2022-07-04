@@ -13,7 +13,7 @@ struct Agent {
     typealias Dict = [String: Any]
     
     func run<T: Decodable>(method: String = "GET", url: URL, access: String? = nil, parameters: [URLQueryItem]? = nil, headers: Dict? = nil, body: Dict? = nil) -> AnyPublisher<T,Error> {
-        print("Run ")
+        
         var urlComp = URLComponents(url: url, resolvingAgainstBaseURL: true)
         if let parameters = parameters { urlComp?.queryItems = parameters}
         

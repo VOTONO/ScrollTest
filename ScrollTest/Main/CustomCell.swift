@@ -23,16 +23,8 @@ class CustomCell: UICollectionViewCell {
     let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
         indicator.clipsToBounds = true
-        indicator.contentMode = .scaleAspectFill
         return indicator
     }()
-    
-    let imageStackView: UIStackView = {
-        let stackView = UIStackView()
-        
-        return stackView
-    }()
-
 
     let myImageView: UIImageView = {
         let imageView = UIImageView()
@@ -41,6 +33,8 @@ class CustomCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         return imageView
     }()
+
+//MARK: - Overrides
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -54,20 +48,23 @@ class CustomCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         myImageView.frame = contentView.bounds
+        activityIndicator.frame = contentView.bounds
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         myImageView.image = nil
     }
+
+//MARK: - Initialize
     
     func initialize() {
         
-        contentView.addSubview(activityIndicator)
         contentView.addSubview(myImageView)
-        myImageView.backgroundColor = .gray
+        contentView.addSubview(activityIndicator)
+        myImageView.backgroundColor = .systemBackground
         
-        
+        //#WARNING Setup photoModel and Image Loader !
         self.photoModel = viewModel.photoModels.value[indexPath.row]
         self.imageLoader = ImageLoader(url: photoModel.smallURL(), cache: imageCache)
         setupSubscriptions()
@@ -81,26 +78,21 @@ class CustomCell: UICollectionViewCell {
             .receive(on: DispatchQueue.main)
             .sink { isLoading in
                 if isLoading {
-                    DispatchQueue.main.async {
-                        self.activityIndicator.startAnimating()
-                    }
-                    
+                    self.activityIndicator.startAnimating()
                 } else {
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                    }
-                    
+                    self.activityIndicator.stopAnimating()
                 }
             }.store(in: &bag)
         
         imageLoader.image
             .receive(on: DispatchQueue.main)
             .sink { image in
-                DispatchQueue.main.async {
-                    print("Setup Image")
-                    self.myImageView.image = image
-                }
-            
+                UIView.transition(with: self.myImageView,
+                                  duration: 0.5,
+                                  options: .transitionCrossDissolve,
+                                  animations: {
+                                   self.myImageView.image = image
+                                    })
         }.store(in: &bag)
     }
     

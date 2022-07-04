@@ -8,52 +8,39 @@
 import UIKit
 import Combine
 
-class MainCollectionView: UICollectionViewController {
+final class MainCollectionView: UICollectionViewController {
     
-    
+    // Image Cache for injection into cells
     var imageCache: ImageCache = ImageCache()
     var viewModel: CollectionViewModel!
     
     private var dataSource: DataSource!
     private var snapshot = DataCourceSnapshot()
     
+    //Cells animation time
+    private let animationTime: Double = 0.7
+    
     private var bag = Set<AnyCancellable>()
 
+//MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureCollectionViewDataSource()
-        applySnapshot(photoModels: viewModel.photoModels.value)
-
-        // Register cell classes
-        registerCell()
-        collectionView.setCollectionViewLayout(generateLayout(), animated: false)
-
-        // Do any additional setup after loading the view.
+        setupCollectionView()
         setupRefreshControl()
         setupSubscription()
-
     }
+
+//MARK: - Overrides
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-
-        let cell = collectionView.cellForItem(at: indexPath)
-        let nextCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
         guard let photoModel = dataSource.itemIdentifier(for: indexPath) else {return}
         
-        let originalTransform = self.view.transform
-        let cellTransform = originalTransform.translatedBy(x: +(self.view.frame.width), y: 0.0)
-        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(self.view.frame.width - 10))
+        animateCells(indexPath: indexPath, animationTime: animationTime)
         
-        UIView.animate(withDuration: 0.7, animations: {
-            cell?.transform = cellTransform
-            cell?.alpha = 0
-            nextCell?.transform = nextCellTransform
-            })
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7, execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationTime, execute: {
             self.viewModel.storeDeletion(photoModel: photoModel, at: indexPath.row)
             self.viewModel.photoModels.value.remove(at: indexPath.row)
-            //self.deleteFromSnapshot(photoModels: [photoModel])
         })
     }
     
@@ -63,6 +50,11 @@ class MainCollectionView: UICollectionViewController {
             self.viewModel.fetchRandom()
         }
     }
+}
+
+//MARK: - Functions, Actions and Subscriptions
+    
+extension MainCollectionView {
     
     private func setupRefreshControl() {
         let refresh = UIRefreshControl()
@@ -82,12 +74,17 @@ class MainCollectionView: UICollectionViewController {
         }.store(in: &bag)
 
     }
-    
 }
 
-
-//MARK: Setup Collection View
+//MARK: - Setup Collection View
 extension MainCollectionView {
+    
+    private func setupCollectionView() {
+        configureCollectionViewDataSource()
+        applySnapshot(photoModels: viewModel.photoModels.value)
+        registerCell()
+        collectionView.setCollectionViewLayout(generateLayout(), animated: false)
+    }
     
     typealias DataSource = UICollectionViewDiffableDataSource<Section, PhotoModel>
     typealias DataCourceSnapshot = NSDiffableDataSourceSnapshot<Section, PhotoModel>
@@ -112,20 +109,12 @@ extension MainCollectionView {
             return cell
         })
     }
-    
-    private func deleteFromSnapshot(photoModels: [PhotoModel]) {
-        snapshot.deleteItems(photoModels)
-        dataSource.apply(snapshot, animatingDifferences: false)
-    }
-    
     private func applySnapshot(photoModels: [PhotoModel]) {
         snapshot = DataCourceSnapshot()
         snapshot.appendSections([Section.main])
         snapshot.appendItems(photoModels, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
-    
-    
     
     private func registerCell() {
         collectionView.register(CustomCell.self, forCellWithReuseIdentifier: CustomCell.id)
@@ -140,6 +129,28 @@ extension MainCollectionView {
         layout.minimumInteritemSpacing = 10
         
         return layout
+    }
+    
+}
+
+
+
+//MARK: Animations
+extension MainCollectionView {
+    
+    private func animateCells(indexPath: IndexPath, animationTime: Double) {
+        let cell = collectionView.cellForItem(at: indexPath)
+        let nextCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
+        
+        let originalTransform = self.view.transform
+        let cellTransform = originalTransform.translatedBy(x: +(self.view.frame.width), y: 0.0)
+        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(self.view.frame.width - 10))
+        
+        UIView.animate(withDuration: animationTime, animations: {
+            cell?.transform = cellTransform
+            cell?.alpha = 0
+            nextCell?.transform = nextCellTransform
+            })
     }
     
 }

@@ -13,14 +13,14 @@ final class ImageLoader {
     
     var image = PassthroughSubject<UIImage?, Never>()
     
-    private let url: URL?
+    private let url: URL
     private(set) var isLoading = CurrentValueSubject<Bool, Never>(false)
-    private var cache: ImageCache?
+    private var cache: ImageCache
     private var cancellable: AnyCancellable?
     
     private static let imageProcessingQueue = DispatchQueue(label: "image-processing")
     
-    init(url: URL?, cache: ImageCache? = nil) {
+    init(url: URL, cache: ImageCache) {
         self.url = url
         self.cache = cache
     }
@@ -31,13 +31,11 @@ final class ImageLoader {
     
     func load() {
         
-        guard !isLoading.value, let url = url else { return }
+        guard !isLoading.value else { return }
         
-        
-        
-        if let data = cache?[url] {
+        if let data = cache[url] {
             self.image.send(UIImage(data: data))
-            print("Load image from cache")
+            print("Loaded image from cache")
             return
         }
         
@@ -49,7 +47,6 @@ final class ImageLoader {
                           receiveCompletion: { [weak self] _ in self?.onFinish() },
                           receiveCancel: { [weak self] in self?.onFinish() })
             .subscribe(on: Self.imageProcessingQueue)
-            //.receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.image.send($0) }
     }
     
@@ -66,8 +63,7 @@ final class ImageLoader {
     }
     
     private func cache(_ image: UIImage?) {
-        guard let url = url else { return }
-        image.map { cache?[url] = $0.jpegData(compressionQuality: 0.8) }
+        image.map { cache[url] = $0.jpegData(compressionQuality: 0.8) }
     }
     
 }
