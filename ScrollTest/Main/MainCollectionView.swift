@@ -36,20 +36,24 @@ class MainCollectionView: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 
         let cell = collectionView.cellForItem(at: indexPath)
+        let nextCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
+        guard let photoModel = dataSource.itemIdentifier(for: indexPath) else {return}
         
         let originalTransform = self.view.transform
-        let scaledAndTranslatedTransform = originalTransform.translatedBy(x: self.view.frame.width, y: 0.0)
+        let cellTransform = originalTransform.translatedBy(x: +(self.view.frame.width), y: 0.0)
+        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(self.view.frame.width - 10))
         
         UIView.animate(withDuration: 0.7, animations: {
-            cell?.transform = scaledAndTranslatedTransform
+            cell?.transform = cellTransform
             cell?.alpha = 0
+            nextCell?.transform = nextCellTransform
             })
         
-        let photoModel = viewModel.photoModels.value[indexPath.row]
-        deleteFromSnapshot(photoModels: [photoModel])
-        
-//            self.viewModel.photoModels.value.remove(at: indexPath.row)
-            print(self.viewModel.photoModels.value.count)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7, execute: {
+            self.viewModel.storeDeletion(photoModel: photoModel, at: indexPath.row)
+            self.viewModel.photoModels.value.remove(at: indexPath.row)
+            //self.deleteFromSnapshot(photoModels: [photoModel])
+        })
     }
     
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -62,7 +66,6 @@ class MainCollectionView: UICollectionViewController {
     
     private func setupSubscription() {
         viewModel.photoModels
-            .debounce(for: 0.5, scheduler: RunLoop.main)
             .sink { photoModels in
             self.applySnapshot(photoModels: photoModels)
         }.store(in: &bag)
@@ -101,14 +104,14 @@ extension MainCollectionView {
     
     private func deleteFromSnapshot(photoModels: [PhotoModel]) {
         snapshot.deleteItems(photoModels)
-        dataSource.apply(snapshot)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     private func applySnapshot(photoModels: [PhotoModel]) {
         snapshot = DataCourceSnapshot()
         snapshot.appendSections([Section.main])
-        snapshot.appendItems(photoModels)
-        dataSource.apply(snapshot)
+        snapshot.appendItems(photoModels, toSection: .main)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     
