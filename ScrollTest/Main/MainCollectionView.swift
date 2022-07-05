@@ -44,7 +44,6 @@ final class MainCollectionView: UICollectionViewController {
 //MARK: - Overrides
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let photoModel = dataSource.itemIdentifier(for: indexPath) else {return}
         
         animateCells(indexPath: indexPath, animationTime: animationTime)
         
@@ -132,8 +131,7 @@ extension MainCollectionView {
         dataSource = DataSource(collectionView: collectionView, cellProvider: { collectionView, indexPath, photoModel -> CustomCell? in
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CustomCell.id, for: indexPath) as! CustomCell
             
-            //# WARNING! Don't forget to ingect ViewModel, imageCache(with self.imageCache) and Photo Model!!!
-            cell.viewModel = self.viewModel
+            //# WARNING! Don't forget to ingect imageCache(with self.imageCache) and Photo Model!!!
             cell.imageCache = self.imageCache
             cell.photoModel = self.viewModel.photoModels.value[indexPath.row]
             

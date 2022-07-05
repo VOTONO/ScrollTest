@@ -17,8 +17,6 @@ final class CollectionViewModel: ObservableObject {
     
     var state = CurrentValueSubject<MainViewState, Never>(.success)
     public let pullToRefreshSubject = PassthroughSubject<Void, Never>()
-
-    private var deletedStorage: [Int : PhotoModel] = [ : ]
     
     // Photo per page
     private let limit = 5
@@ -49,11 +47,6 @@ final class CollectionViewModel: ObservableObject {
                 self.page += 1
                 self.state.send(.success)
             }).store(in: &bag)
-    }
-    
-    
-    func storeDeletion(photoModel: PhotoModel, at index: Int) {
-        deletedStorage[index] = photoModel
     }
     
     private func setupSubscriptions() {

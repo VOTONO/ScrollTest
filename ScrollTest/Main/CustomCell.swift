@@ -12,7 +12,6 @@ class CustomCell: UICollectionViewCell {
     
     static let id = "Custom Cell"
     
-    var viewModel: CollectionViewModel!
     var photoModel: PhotoModel! 
     var imageLoader: ImageLoader!
     var imageCache: ImageCache!
