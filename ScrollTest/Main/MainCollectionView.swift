@@ -17,21 +17,19 @@ final class MainCollectionView: UICollectionViewController {
     private var dataSource: DataSource!
     private var snapshot = DataCourceSnapshot()
     
+    private var bag = Set<AnyCancellable>()
+    
     //Cells animation time
     private let animationTime: Double = 0.7
-    
-    private var bag = Set<AnyCancellable>()
-
-    var width: CGFloat {
+    private var portraitWidth: CGFloat {
         
         if (UIWindow.isLandscape) {
-            print("Landscape")
             return UIScreen.main.bounds.height
         } else {
-            print("Portrait")
             return UIScreen.main.bounds.width
         }
     }
+    private var spinner = UIActivityIndicatorView(style: .large)
 
 //MARK: - Lifecycle
     
@@ -39,6 +37,7 @@ final class MainCollectionView: UICollectionViewController {
         super.viewDidLoad()
         setupCollectionView()
         setupRefreshControl()
+        setupSpinner()
         setupSubscription()
     }
 
@@ -50,14 +49,12 @@ final class MainCollectionView: UICollectionViewController {
         animateCells(indexPath: indexPath, animationTime: animationTime)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + animationTime, execute: {
-            self.viewModel.storeDeletion(photoModel: photoModel, at: indexPath.row)
             self.viewModel.photoModels.value.remove(at: indexPath.row)
         })
     }
     
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.row == viewModel.photoModels.value.count - 1 {
-            print("Load Page")
             self.viewModel.fetchRandom()
         }
     }
@@ -79,11 +76,36 @@ extension MainCollectionView {
     }
     
     private func setupSubscription() {
+        
         viewModel.photoModels
             .sink { photoModels in
             self.applySnapshot(photoModels: photoModels)
         }.store(in: &bag)
+        
+        viewModel.state
+            .receive(on: DispatchQueue.main)
+            .sink { state in
+                switch state {
+                case .success:
+                    self.spinner.stopAnimating()
+                case .loading:
+                    break
+                case .error(let error):
+                    self.spinner.stopAnimating()
+                    self.showAlert(description: error.description)
+                }
+            }.store(in: &bag)
+    }
+    
+    private func showAlert(description: String) {
+        let alert = UIAlertController(title: "Error", message: "\(description)", preferredStyle: .alert)
 
+        let cancel = UIAlertAction(title: "Retry", style: .default) { (action) -> Void in
+            self.viewModel.fetchRandom()
+        }
+        alert.addAction(cancel)
+
+        self.present(alert, animated: true, completion: nil)
     }
 }
 
@@ -110,10 +132,10 @@ extension MainCollectionView {
         dataSource = DataSource(collectionView: collectionView, cellProvider: { collectionView, indexPath, photoModel -> CustomCell? in
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CustomCell.id, for: indexPath) as! CustomCell
             
-            //# WARNING! Don't forget to ingect ViewModel, imageCache(with self.imageCache) and IndexPath!!!
+            //# WARNING! Don't forget to ingect ViewModel, imageCache(with self.imageCache) and Photo Model!!!
             cell.viewModel = self.viewModel
             cell.imageCache = self.imageCache
-            cell.indexPath = indexPath
+            cell.photoModel = self.viewModel.photoModels.value[indexPath.row]
             
             //# WARNING! Call this function only after injections
             cell.initialize()
@@ -123,7 +145,7 @@ extension MainCollectionView {
     private func applySnapshot(photoModels: [PhotoModel]) {
         snapshot = DataCourceSnapshot()
         snapshot.appendSections([Section.main])
-        snapshot.appendItems(photoModels, toSection: .main)
+        snapshot.appendItems(photoModels)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
@@ -133,7 +155,7 @@ extension MainCollectionView {
     
     private func generateLayout() -> UICollectionViewFlowLayout {
         let layout = UICollectionViewFlowLayout()
-        let size = (width - 20)
+        let size = (portraitWidth - 20)
         
         layout.itemSize = CGSize(width: size, height: size)
         layout.minimumLineSpacing = 10
@@ -144,24 +166,33 @@ extension MainCollectionView {
     
 }
 
-
-
 //MARK: Animations
 extension MainCollectionView {
     
     private func animateCells(indexPath: IndexPath, animationTime: Double) {
         let cell = collectionView.cellForItem(at: indexPath)
-        let nextCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
+        let secondCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
+        let thirdCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 2, section: indexPath.section))
         
         let originalTransform = self.view.transform
         let cellTransform = originalTransform.translatedBy(x: +(UIScreen.main.bounds.width), y: 0.0)
-        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(width - 10))
+        let secondCellTransform = originalTransform.translatedBy(x: 0.0, y: -(portraitWidth - 10))
+        let thirdCellTransform = originalTransform.translatedBy(x: 0.0, y: -(portraitWidth - 10))
         
         UIView.animate(withDuration: animationTime, animations: {
             cell?.transform = cellTransform
             cell?.alpha = 0
-            nextCell?.transform = nextCellTransform
+            secondCell?.transform = secondCellTransform
+            thirdCell?.transform = thirdCellTransform
             })
+    }
+    
+    private func setupSpinner() {
+        self.view.addSubview(spinner)
+        spinner.startAnimating()
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
     }
     
 }

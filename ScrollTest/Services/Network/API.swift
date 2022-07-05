@@ -17,7 +17,7 @@ enum API {
 extension API {
     static func getRandomCats(page: Int, limit: Int) -> AnyPublisher<SearchModel, Error> {
         let url = base.appendingPathComponent("/search/photos")
-        let queryItem = [URLQueryItem(name: "query", value: "cat"),
+        let queryItem = [URLQueryItem(name: "query", value: "dog"),
                          URLQueryItem(name: "orientation", value: "squarish"),
                          URLQueryItem(name: "page", value: "\(page)"),
                          URLQueryItem(name: "per_page", value: "\(limit)"),

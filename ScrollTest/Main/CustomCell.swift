@@ -15,13 +15,12 @@ class CustomCell: UICollectionViewCell {
     var viewModel: CollectionViewModel!
     var photoModel: PhotoModel! 
     var imageLoader: ImageLoader!
-    var indexPath: IndexPath!
     var imageCache: ImageCache!
     
     private var bag = Set<AnyCancellable>()
     
     let activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
+        let indicator = UIActivityIndicatorView(style: .large)
         indicator.clipsToBounds = true
         return indicator
     }()
@@ -64,8 +63,7 @@ class CustomCell: UICollectionViewCell {
         contentView.addSubview(activityIndicator)
         myImageView.backgroundColor = .systemBackground
         
-        //#WARNING Setup photoModel and Image Loader !
-        self.photoModel = viewModel.photoModels.value[indexPath.row]
+        //#WARNING Setup Image Loader !
         self.imageLoader = ImageLoader(url: photoModel.smallURL(), cache: imageCache)
         setupSubscriptions()
         imageLoader.load()
