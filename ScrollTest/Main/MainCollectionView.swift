@@ -22,6 +22,17 @@ final class MainCollectionView: UICollectionViewController {
     
     private var bag = Set<AnyCancellable>()
 
+    var width: CGFloat {
+        
+        if (UIWindow.isLandscape) {
+            print("Landscape")
+            return UIScreen.main.bounds.height
+        } else {
+            print("Portrait")
+            return UIScreen.main.bounds.width
+        }
+    }
+
 //MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -122,7 +133,7 @@ extension MainCollectionView {
     
     private func generateLayout() -> UICollectionViewFlowLayout {
         let layout = UICollectionViewFlowLayout()
-        let size = (view.frame.size.width - 20)
+        let size = (width - 20)
         
         layout.itemSize = CGSize(width: size, height: size)
         layout.minimumLineSpacing = 10
@@ -143,8 +154,8 @@ extension MainCollectionView {
         let nextCell = collectionView.cellForItem(at: IndexPath(row: indexPath.row + 1, section: indexPath.section))
         
         let originalTransform = self.view.transform
-        let cellTransform = originalTransform.translatedBy(x: +(self.view.frame.width), y: 0.0)
-        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(self.view.frame.width - 10))
+        let cellTransform = originalTransform.translatedBy(x: +(UIScreen.main.bounds.width), y: 0.0)
+        let nextCellTransform = originalTransform.translatedBy(x: 0.0, y: -(width - 10))
         
         UIView.animate(withDuration: animationTime, animations: {
             cell?.transform = cellTransform
